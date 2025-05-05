@@ -16,7 +16,7 @@ class Booking extends Model
         'end_datetime',
         'purpose',
         'status',
-        'headmaster_approved',
+        // 'headmaster_approved',
     ];
 
     protected $casts = [

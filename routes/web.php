@@ -34,7 +34,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('facility-categories', FacilityCategoryController::class);
     Route::resource('facilities', FacilityController::class);
     Route::resource('facility-items', FacilityItemController::class);
-
     
     Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
