@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use App\Models\Booking;
 use App\Models\FacilityItem;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use App\Models\Users;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class BookingApiController extends Controller
 {
@@ -116,42 +118,61 @@ class BookingApiController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $token = $request->bearerToken(); // Ambil token dari header Authorization
+
+        $user = Users::where('remember_token', $token)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized. Invalid token.'
+            ], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
             'facility_item_id' => 'required|exists:facility_items,id',
             'start_datetime' => 'required|date|after:now',
             'end_datetime' => 'required|date|after:start_datetime',
             'purpose' => 'required|string|max:255',
         ]);
-        
-        // Check availability
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors(),
+            ], 422);
+        }
+
         $isAvailable = $this->checkAvailability(
-            $validated['facility_item_id'],
-            $validated['start_datetime'],
-            $validated['end_datetime']
+            $request->facility_item_id,
+            $request->start_datetime,
+            $request->end_datetime
         );
-        
+
         if (!$isAvailable) {
             return response()->json([
                 'status' => false,
                 'message' => 'This facility is already reserved for the selected time slot.'
-            ], 400);
+            ], 409);
         }
-        
+
         $booking = new Booking();
-        $booking->user_id = $request->user()->id;
-        $booking->facility_item_id = $validated['facility_item_id'];
-        $booking->start_datetime = $validated['start_datetime'];
-        $booking->end_datetime = $validated['end_datetime'];
-        $booking->purpose = $validated['purpose'];
+        $booking->user_id = $user->id; // Ambil dari token
+        $booking->facility_item_id = $request->facility_item_id;
+        $booking->start_datetime = $request->start_datetime;
+        $booking->end_datetime = $request->end_datetime;
+        $booking->purpose = $request->purpose;
         $booking->status = 'pending';
         $booking->save();
-        
+
         return response()->json([
             'status' => true,
             'message' => 'Booking request submitted successfully.',
             'data' => $booking
         ], 201);
     }
+
+
 
     public function update(Request $request, Booking $booking)
     {

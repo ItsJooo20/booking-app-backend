@@ -14,18 +14,16 @@ use App\Http\Controllers\Api\FacilityApiController;
 Route::post('/login', [LoginApiController::class, 'authenticate'])->name('login');
 Route::post('/logout', [LoginApiController::class, 'logout'])->name('logout');
 
-
-
 Route::middleware(['authToken'])->group(function () {
 
-    Route::get('/bookings', [BookingApiController::class, 'index']);
-    Route::get('/bookings/upcoming', [BookingApiController::class, 'upcoming']);
-    Route::get('/bookings/{booking}', [BookingApiController::class, 'show']);
+    // Route::get('/bookings', [BookingApiController::class, 'index']);
+    // Route::get('/bookings/upcoming', [BookingApiController::class, 'upcoming']);
+    // Route::get('/bookings/{booking}', [BookingApiController::class, 'show']);
     Route::post('/bookings', [BookingApiController::class, 'store']);
-    Route::put('/bookings/{booking}', [BookingApiController::class, 'update']);
-    Route::delete('/bookings/{booking}', [BookingApiController::class, 'destroy']);
-    Route::post('/bookings/{booking}/approve', [BookingApiController::class, 'approve']);
-    Route::post('/bookings/{booking}/reject', [BookingApiController::class, 'reject']);
+    // Route::put('/bookings/{booking}', [BookingApiController::class, 'update']);
+    // Route::delete('/bookings/{booking}', [BookingApiController::class, 'destroy']);
+    // Route::post('/bookings/{booking}/approve', [BookingApiController::class, 'approve']);
+    // Route::post('/bookings/{booking}/reject', [BookingApiController::class, 'reject']);
     Route::get('/approved-events', [BookingApiController::class, 'approvedEvents']);
 
     Route::get('/facility-categories', [FacilityApiController::class, 'categories']);

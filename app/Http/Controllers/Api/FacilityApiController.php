@@ -11,9 +11,6 @@ use App\Http\Controllers\Controller;
 
 class FacilityApiController extends Controller
 {
-    /**
-     * Get all facility categories
-     */
     public function categories(Request $request)
     {
         $categories = FacilityCategory::withCount('facilities')
