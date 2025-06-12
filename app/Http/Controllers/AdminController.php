@@ -120,6 +120,9 @@ class AdminController extends Controller
     // }
     public function listUsers(Request $request)
     {
+        // $users = Users::all();
+        // $admin = Admin::all();
+        
         $query = Users::where('is_active', 1);
 
         if ($request->has('search')) {
@@ -173,10 +176,10 @@ class AdminController extends Controller
         $user = new Users();
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-        $user->password = Hash::make($validated['password']);
+        $user->password = $validated['password'];
         $user->role = $validated['role'];
         $user->phone = $validated['phone'];
-        $user->is_active = $request->has('is_active') ? 1 : 0;
+        $user->is_active = 1;
         $user->save();
 
         return redirect()->route('users.list')
@@ -206,7 +209,7 @@ class AdminController extends Controller
         }
         $user->role = $validated['role'];
         $user->phone = $validated['phone'];
-        $user->is_active = $request->has('is_active') ? 1 : 0;
+        $user->is_active = 1;
         $user->save();
 
         return redirect()->route('users.list')

@@ -13,7 +13,8 @@ class Users extends Authenticatable
     use HasFactory, Notifiable;
     protected $primaryKey = 'id';
     protected $table = 'users';
-    protected $fillable = ["name", "email", "password", "role", "phone", "remember_token", "is_active", "created_at", "updated_at", "deleted_at"];
+    protected $fillable = ["name", "email", "password", "password_reset_tokens", "role", "phone", "remember_token", "is_active", "created_at", "updated_at", "deleted_at", "email_verification_token", "email_verified_at"];
+    public $timestamps = false;
 
     protected static function boot()
     {
@@ -38,4 +39,12 @@ class Users extends Authenticatable
     {
         return $this->hasMany(RepairTask::class, 'technician_id');
     }
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'is_active' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
+    ];
 }

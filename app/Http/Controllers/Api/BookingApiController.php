@@ -292,7 +292,7 @@ class BookingApiController extends Controller
                 'status' => false,
                 'message' => 'This timeslot is no longer available.'
             ], 400);
-        }
+        };
 
         $rejectedCount = 0;
 
@@ -377,5 +377,75 @@ class BookingApiController extends Controller
         }
         
         return $query->count() === 0;
+    }
+
+    public function userBookingHistory(Request $request)
+    {
+        $token = $request->bearerToken(); // Ambil token dari header Authorization
+
+        $user = Users::where('remember_token', $token)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized. Invalid token.'
+            ], 401);
+        }
+        
+        // Start with the base query
+        $query = Booking::where('user_id', $user->id);
+        
+        // Apply status filter if provided
+        if ($request->has('status') && !empty($request->status)) {
+            $query->where('status', $request->status);
+        }
+        
+        // Apply time filter if provided
+        if ($request->has('time_filter')) {
+            $today = Carbon::today();
+            
+            switch ($request->time_filter) {
+                case 'today':
+                    $query->whereDate('start_datetime', $today);
+                    break;
+                case 'week':
+                    $query->whereBetween('start_datetime', [
+                        $today->startOfWeek(),
+                        $today->endOfWeek()
+                    ]);
+                    break;
+                case 'month':
+                    $query->whereBetween('start_datetime', [
+                        $today->startOfMonth(),
+                        $today->endOfMonth()
+                    ]);
+                    break;
+            }
+        }
+        
+        // Sort by most recent first
+        $bookings = $query->with(['facilityItem.facility'])
+                        ->latest('start_datetime')
+                        ->get();
+        
+        // Format the response data
+        $formattedBookings = $bookings->map(function ($booking) {
+            return [
+                'id' => $booking->id,
+                'facility_name' => $booking->facilityItem->facility->name,
+                'item_code' => $booking->facilityItem->item_code,
+                'item_notes' => $booking->facilityItem->notes,
+                'start_datetime' => $booking->start_datetime,
+                'end_datetime' => $booking->end_datetime,
+                'purpose' => $booking->purpose,
+                'status' => $booking->status,
+                'created_at' => $booking->created_at,
+            ];
+        });
+        
+        return response()->json([
+            'status' => 'success',
+            'data' => $formattedBookings
+        ]);
     }
 }

@@ -8,7 +8,7 @@ use App\Models\Booking;
 use App\Models\Facility;
 use App\Models\FacilityItem;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\FacilityCategory;
 use Illuminate\Support\Facades\Validator;
 
@@ -218,7 +218,7 @@ class ReportController extends Controller
         // Reuse the generate method logic to get data
         $data = $this->generate($request)->getData();
         
-        $pdf = PDF::loadView('admin.reports-pdf', (array)$data);
+        $pdf = Pdf::loadView('admin.reports-pdf', (array)$data);
         return $pdf->download('bookings-report-'.now()->format('YmdHis').'.pdf');
     }
 
